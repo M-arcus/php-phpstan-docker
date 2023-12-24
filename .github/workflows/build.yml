@@ -1,0 +1,75 @@
+name: Build Docker Image
+
+on:
+  push:
+    paths:
+      - build.sh
+      - .github/workflows/build.yml
+  schedule:
+    - cron: '5 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+          - arch: arm64
+    outputs:
+      CS_FIXER_VERSION: ${{ steps.cs_fixer_version.outputs.CS_FIXER_VERSION }}
+    steps:
+      - name: Clone
+        uses: actions/checkout@v4
+
+      - name: Install Chisel
+        run: |
+          cd /tmp
+          wget https://github.com/canonical/chisel/releases/download/v0.8.1/chisel_v0.8.1_linux_amd64.tar.gz
+          tar xfv chisel_v0.8.1_linux_amd64.tar.gz
+          sudo mv chisel /usr/local/bin/chisel
+
+      - name: Login into Docker Hub
+        run: echo "${{ secrets.DOCKER_HUB_PAT }}" | docker login -u shyim --password-stdin
+
+      - name: Get latest PHP-CS-Fixer version
+        id: cs_fixer_version
+        run: |
+          VERSION=$(curl https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/releases/latest | jq '.tag_name | ltrimstr("v")' -r)
+          echo "CS_FIXER_VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "CS_FIXER_VERSION=${VERSION}" >> "$GITHUB_ENV"
+
+      - name: Build image
+        run: ./build.sh $CS_FIXER_VERSION ${{ matrix.arch }} --push
+  merge:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Regctl
+        uses: iarekylew00t/regctl-installer@v1
+
+      - name: Login into Github Docker Registery
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Login into Docker Hub
+        run: echo "${{ secrets.DOCKER_HUB_PAT }}" | docker login -u shyim --password-stdin
+
+      - name: Get Version from previous JOB
+        run: echo "CS_FIXER_VERSION=${{ needs.build.outputs.CS_FIXER_VERSION }}" >> "$GITHUB_ENV"
+
+      - run: docker manifest create shyim/php-cs-fixer:${CS_FIXER_VERSION} --amend shyim/php-cs-fixer:${CS_FIXER_VERSION}-amd64 --amend shyim/php-cs-fixer:${CS_FIXER_VERSION}-arm64
+
+      - run: docker manifest create shyim/php-cs-fixer:latest --amend shyim/php-cs-fixer:${CS_FIXER_VERSION}-amd64 --amend shyim/php-cs-fixer:${CS_FIXER_VERSION}-arm64
+
+      - run: docker manifest push shyim/php-cs-fixer:${CS_FIXER_VERSION}
+
+      - run: docker manifest push shyim/php-cs-fixer:latest
+
+      - run: regctl image copy shyim/php-cs-fixer:${CS_FIXER_VERSION} ghcr.io/shyim/php-cs-fixer:${CS_FIXER_VERSION}
+
+      - run: regctl image copy shyim/php-cs-fixer:latest ghcr.io/shyim/php-cs-fixer:latest
