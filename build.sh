@@ -22,7 +22,7 @@ rm -rf rootfs
 mkdir rootfs
 
 if [[ ! -d db ]]; then
-  git clone -b add-php https://github.com/shyim/chisel-releases.git db
+  git clone -b ubuntu-23.10-php https://github.com/shyim/chisel-releases.git db
 fi
 
 chisel cut --arch=$ARCH --release ./db --root rootfs/ php8.2-cli_base php8.2-common_tokenizer php8.2-common_phar php8.2-mbstring_all php8.2-xml_dom
