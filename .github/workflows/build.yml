@@ -28,11 +28,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Chisel
-        run: |
-          cd /tmp
-          wget https://github.com/canonical/chisel/releases/download/v0.8.1/chisel_v0.8.1_linux_amd64.tar.gz
-          tar xfv chisel_v0.8.1_linux_amd64.tar.gz
-          sudo mv chisel /usr/local/bin/chisel
+        uses: shyim/chisel-installer@main
 
       - name: Login into Docker Hub
         run: echo "${{ secrets.DOCKER_HUB_PAT }}" | docker login -u shyim --password-stdin
