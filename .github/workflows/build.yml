@@ -27,7 +27,7 @@ jobs:
         run: echo "${{ secrets.DOCKER_HUB_PAT }}" | docker login -u shyim --password-stdin
 
       - name: Build base and push
-        run: ./build.sh
+        run: ./build-base.sh
   cs-fixer:
     needs: [base]
     runs-on: ubuntu-latest
@@ -52,6 +52,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
+          platforms: linux/amd64,linux/arm64
           build-args: |
             PHP_CS_FIXER_VERSION=${{ steps.cs_fixer_version.outputs.CS_FIXER_VERSION }}
           tags: |
