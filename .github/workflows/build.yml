@@ -3,7 +3,7 @@ name: Build Docker Image
 on:
   push:
     paths:
-      - build.sh
+      - build-base.sh
       - .github/workflows/build.yml
   schedule:
     - cron: '5 3 * * *'
@@ -14,40 +14,11 @@ permissions:
   packages: write
 
 jobs:
-  build:
+  base:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - arch: amd64
-          - arch: arm64
-    outputs:
-      CS_FIXER_VERSION: ${{ steps.cs_fixer_version.outputs.CS_FIXER_VERSION }}
     steps:
       - name: Clone
         uses: actions/checkout@v4
-
-      - name: Install Chisel
-        uses: shyim/chisel-installer@main
-
-      - name: Login into Docker Hub
-        run: echo "${{ secrets.DOCKER_HUB_PAT }}" | docker login -u shyim --password-stdin
-
-      - name: Get latest PHP-CS-Fixer version
-        id: cs_fixer_version
-        run: |
-          VERSION=$(curl https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/releases/latest | jq '.tag_name | ltrimstr("v")' -r)
-          echo "CS_FIXER_VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "CS_FIXER_VERSION=${VERSION}" >> "$GITHUB_ENV"
-
-      - name: Build image
-        run: ./build.sh $CS_FIXER_VERSION ${{ matrix.arch }} --push
-  merge:
-    needs: [build]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install Regctl
-        uses: iarekylew00t/regctl-installer@v1
 
       - name: Login into Github Docker Registery
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -55,17 +26,36 @@ jobs:
       - name: Login into Docker Hub
         run: echo "${{ secrets.DOCKER_HUB_PAT }}" | docker login -u shyim --password-stdin
 
-      - name: Get Version from previous JOB
-        run: echo "CS_FIXER_VERSION=${{ needs.build.outputs.CS_FIXER_VERSION }}" >> "$GITHUB_ENV"
+      - name: Build base and push
+        run: ./build.sh
+  cs-fixer:
+    needs: [base]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get latest PHP-CS-Fixer version
+        id: cs_fixer_version
+        run: |
+          VERSION=$(curl https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/releases/latest | jq '.tag_name | ltrimstr("v")' -r)
+          echo "CS_FIXER_VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "CS_FIXER_VERSION=${VERSION}" >> "$GITHUB_ENV"
 
-      - run: docker manifest create shyim/php-cs-fixer:${CS_FIXER_VERSION} --amend shyim/php-cs-fixer:${CS_FIXER_VERSION}-amd64 --amend shyim/php-cs-fixer:${CS_FIXER_VERSION}-arm64
+      - name: Login into Github Docker Registery
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - run: docker manifest create shyim/php-cs-fixer:latest --amend shyim/php-cs-fixer:${CS_FIXER_VERSION}-amd64 --amend shyim/php-cs-fixer:${CS_FIXER_VERSION}-arm64
+      - name: Login into Docker Hub
+        run: echo "${{ secrets.DOCKER_HUB_PAT }}" | docker login -u shyim --password-stdin
 
-      - run: docker manifest push shyim/php-cs-fixer:${CS_FIXER_VERSION}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - run: docker manifest push shyim/php-cs-fixer:latest
-
-      - run: regctl image copy shyim/php-cs-fixer:${CS_FIXER_VERSION} ghcr.io/shyim/php-cs-fixer:${CS_FIXER_VERSION}
-
-      - run: regctl image copy shyim/php-cs-fixer:latest ghcr.io/shyim/php-cs-fixer:latest
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          build-args: |
+            PHP_CS_FIXER_VERSION=${{ steps.cs_fixer_version.outputs.CS_FIXER_VERSION }}
+          tags: |
+            shyim/php-cs-fixer:latest
+            shyim/php-cs-fixer:${{ steps.cs_fixer_version.outputs.CS_FIXER_VERSION }}
+            ghcr.io/shyim/php-cs-fixer:latest
+            ghcr.io/shyim/php-cs-fixer:${{ steps.cs_fixer_version.outputs.CS_FIXER_VERSION }}
