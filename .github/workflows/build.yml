@@ -20,11 +20,11 @@ jobs:
       - name: Clone
         uses: actions/checkout@v4
 
-      - name: Login into Github Docker Registery
+      - name: Login into Github Docker Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Login into Docker Hub
-        run: echo "${{ secrets.DOCKER_HUB_PAT }}" | docker login -u shyim --password-stdin
+        run: echo "${{ secrets.DOCKER_HUB_PAT }}" | docker login -u marcusmu --password-stdin
 
       - name: Build base and push
         run: ./build-base.sh
@@ -39,11 +39,11 @@ jobs:
           echo "CS_FIXER_VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "CS_FIXER_VERSION=${VERSION}" >> "$GITHUB_ENV"
 
-      - name: Login into Github Docker Registery
+      - name: Login into Github Docker Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Login into Docker Hub
-        run: echo "${{ secrets.DOCKER_HUB_PAT }}" | docker login -u shyim --password-stdin
+        run: echo "${{ secrets.DOCKER_HUB_PAT }}" | docker login -u marcusmu --password-stdin
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -56,7 +56,7 @@ jobs:
           build-args: |
             PHP_CS_FIXER_VERSION=${{ steps.cs_fixer_version.outputs.CS_FIXER_VERSION }}
           tags: |
-            shyim/php-cs-fixer:latest
-            shyim/php-cs-fixer:${{ steps.cs_fixer_version.outputs.CS_FIXER_VERSION }}
-            ghcr.io/shyim/php-cs-fixer:latest
-            ghcr.io/shyim/php-cs-fixer:${{ steps.cs_fixer_version.outputs.CS_FIXER_VERSION }}
+            marcusmu/php-cs-fixer:latest
+            marcusmu/php-cs-fixer:${{ steps.cs_fixer_version.outputs.CS_FIXER_VERSION }}
+            ghcr.io/m-arcus/php-cs-fixer:latest
+            ghcr.io/m-arcus/php-cs-fixer:${{ steps.cs_fixer_version.outputs.CS_FIXER_VERSION }}

@@ -8,8 +8,8 @@ This image uses Wolfi-OS to create a very small PHP-CS-Fixer Docker image and st
 ## Usage
 
 ```bash
-# or alternative use ghcr.io/shyim/php-cs-fixer:latest
-docker run --rm -v (pwd):(pwd) -w (pwd) shyim/php-cs-fixer:latest --rules @PER-CS2.0,@PER-CS2.0:risky --allow-risky=yes .
+# or alternative use ghcr.io/m-arcus/php-cs-fixer:latest
+docker run --rm -v (pwd):(pwd) -w (pwd) marcusmu/php-cs-fixer:latest --rules @PER-CS2.0,@PER-CS2.0:risky --allow-risky=yes .
 ```
 
 If you don't want to pass the as arguments, you can create your regular `.php-cs-fixer.php` file and PHP-CS-Fixer will pick it up as usual.
