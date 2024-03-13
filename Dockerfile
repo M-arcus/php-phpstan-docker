@@ -10,6 +10,6 @@ LABEL org.opencontainers.image.authors="M-arcus" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.title="PHP Mess Detector"
 
-ADD https://github.com/phpmd/phpmd/releases/download/v${PHP_PHPMD_VERSION}/phpmd.phar /phpmd.phar
+ADD https://github.com/phpmd/phpmd/releases/download/${PHP_PHPMD_VERSION}/phpmd.phar /phpmd.phar
 
 ENTRYPOINT ["/usr/bin/php", "/phpmd.phar"]
