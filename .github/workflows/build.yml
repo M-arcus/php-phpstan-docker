@@ -28,16 +28,16 @@ jobs:
 
       - name: Build base and push
         run: ./build-base.sh
-  cs-fixer:
+  phpmd:
     needs: [base]
     runs-on: ubuntu-latest
     steps:
-      - name: Get latest PHP-CS-Fixer version
-        id: cs_fixer_version
+      - name: Get latest PHP Mess Detector version
+        id: phpmd_version
         run: |
-          VERSION=$(curl https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/releases/latest | jq '.tag_name | ltrimstr("v")' -r)
-          echo "CS_FIXER_VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "CS_FIXER_VERSION=${VERSION}" >> "$GITHUB_ENV"
+          VERSION=$(curl https://api.github.com/repos/phpmd/phpmd/releases/latest | jq '.tag_name | ltrimstr("v")' -r)
+          echo "PHPMD_VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "PHPMD_VERSION=${VERSION}" >> "$GITHUB_ENV"
 
       - name: Login into Github Docker Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -54,9 +54,9 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           build-args: |
-            PHP_CS_FIXER_VERSION=${{ steps.cs_fixer_version.outputs.CS_FIXER_VERSION }}
+            PHP_PHPMD_VERSION=${{ steps.phpmd_version.outputs.PHPMD_VERSION }}
           tags: |
-            marcusmu/php-cs-fixer:latest
-            marcusmu/php-cs-fixer:${{ steps.cs_fixer_version.outputs.CS_FIXER_VERSION }}
-            ghcr.io/m-arcus/php-cs-fixer:latest
-            ghcr.io/m-arcus/php-cs-fixer:${{ steps.cs_fixer_version.outputs.CS_FIXER_VERSION }}
+            marcusmu/php-mess-detector:latest
+            marcusmu/php-mess-detector:${{ steps.phpmd_version.outputs.PHPMD_VERSION }}
+            ghcr.io/m-arcus/php-mess-detector:latest
+            ghcr.io/m-arcus/php-mess-detector:${{ steps.phpmd_version.outputs.PHPMD_VERSION }}

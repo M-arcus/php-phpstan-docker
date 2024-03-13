@@ -5,10 +5,8 @@ contents:
     - https://packages.wolfi.dev/os
   packages:
     - wolfi-base
-    - php-8.3
-    - php-8.3-phar
-    - php-8.3-mbstring
-    - php-8.3-dom
+    - php-8.2
+    - php-8.2-xml
 
 entrypoint:
   command: /bin/sh -l
