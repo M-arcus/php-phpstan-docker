@@ -3,8 +3,10 @@ name: Build Docker Image
 on:
   push:
     paths:
-      - build-base.sh
       - .github/workflows/build.yml
+      - build-base.sh
+      - Dockerfile
+      - wolfi-base.yaml
   schedule:
     - cron: '5 3 * * *'
   workflow_dispatch:
