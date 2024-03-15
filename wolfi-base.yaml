@@ -6,6 +6,7 @@ contents:
   packages:
     - wolfi-base
     - php-8.2
+    - php-8.2-mbstring
     - php-8.2-openssl
     - php-8.2-phar
     - php-8.2-simplexml
