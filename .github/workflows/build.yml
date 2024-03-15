@@ -30,16 +30,16 @@ jobs:
 
       - name: Build base and push
         run: ./build-base.sh
-  phpmd:
+  fink:
     needs: [base]
     runs-on: ubuntu-latest
     steps:
       - name: Get latest PHP Mess Detector version
-        id: phpmd_version
+        id: fink_version
         run: |
-          VERSION=$(curl https://api.github.com/repos/phpmd/phpmd/releases/latest | jq '.tag_name | ltrimstr("v")' -r)
-          echo "PHPMD_VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "PHPMD_VERSION=${VERSION}" >> "$GITHUB_ENV"
+          VERSION=$(curl https://api.github.com/repos/dantleech/fink/releases/latest | jq '.tag_name | ltrimstr("v")' -r)
+          echo "FINK_VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "FINK_VERSION=${VERSION}" >> "$GITHUB_ENV"
 
       - name: Login into Github Docker Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -56,9 +56,9 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           build-args: |
-            PHP_PHPMD_VERSION=${{ steps.phpmd_version.outputs.PHPMD_VERSION }}
+            PHP_FINK_VERSION=${{ steps.fink_version.outputs.FINK_VERSION }}
           tags: |
-            marcusmu/php-mess-detector:latest
-            marcusmu/php-mess-detector:${{ steps.phpmd_version.outputs.PHPMD_VERSION }}
-            ghcr.io/m-arcus/php-mess-detector:latest
-            ghcr.io/m-arcus/php-mess-detector:${{ steps.phpmd_version.outputs.PHPMD_VERSION }}
+            marcusmu/php-fink:latest
+            marcusmu/php-fink:${{ steps.fink_version.outputs.FINK_VERSION }}
+            ghcr.io/m-arcus/php-fink:latest
+            ghcr.io/m-arcus/php-fink:${{ steps.fink_version.outputs.FINK_VERSION }}

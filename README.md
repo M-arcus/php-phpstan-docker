@@ -1,12 +1,16 @@
-# Small PHP-Mess-Detector Docker image
+# Small Fink Docker image
 
-This image uses Wolfi-OS to create a very small PHPMD Docker image and still glibc, to be used in CI/CD pipelines.
+This image uses Wolfi-OS to create a very small [Fink](https://github.com/dantleech/fink) Docker image and still glibc, to be used in CI/CD pipelines.
 
 ## Usage
 
 ```bash
-# or alternative use ghcr.io/m-arcus/php-mess-detector:latest
-docker run --rm -v $(pwd):$(pwd) -w $(pwd) marcusmu/php-mess-detector:latest /path/to/source text codesize
+# or alternative use ghcr.io/m-arcus/php-fink:latest
+docker run --rm -v $(pwd):$(pwd) -w $(pwd) marcusmu/php-fink:latest https://my.website.com/ --output=result.json --exclude-url=Account --insecure
 ```
 
-If you don't want to pass the as arguments, you can create your regular `phpmd.xml` (and `phpmd.baseline.xml` and `.phpmd.result-cache.php` (`--cache`)) file and PHP Mess Detector will pick it up as usual.
+If you want to scan for broken links in a website, you can use the following command:
+
+```bash
+cat result.json | jq -c '. | select(.status!=200) | {status: .status, url: .url, referrer: .referrer}' | jq
+```
