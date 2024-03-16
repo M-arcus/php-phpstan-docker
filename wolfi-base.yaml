@@ -6,6 +6,7 @@ contents:
   packages:
     - wolfi-base
     - php
+    - php-ctype
     - php-dom
     - php-mbstring
     - php-openssl
