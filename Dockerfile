@@ -1,6 +1,6 @@
 FROM ghcr.io/m-arcus/php-fink:base
 
-ARG PHP_PHPMD_VERSION=0.10.3
+ARG PHP_FINK_VERSION=0.11.2
 
 LABEL org.opencontainers.image.authors="M-arcus" \
       org.opencontainers.image.url="https://github.com/dantleech/fink/" \
@@ -10,6 +10,6 @@ LABEL org.opencontainers.image.authors="M-arcus" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.title="Fink"
 
-ADD https://github.com/dantleech/fink/releases/download/${PHP_PHPMD_VERSION}/fink.phar /fink.phar
+ADD https://github.com/dantleech/fink/releases/download/${PHP_FINK_VERSION}/fink.phar /fink.phar
 
 ENTRYPOINT ["/usr/bin/php", "/fink.phar"]
