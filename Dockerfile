@@ -12,4 +12,6 @@ LABEL org.opencontainers.image.authors="M-arcus" \
 
 ADD https://github.com/phpstan/phpstan/releases/download/${PHP_PHPSTAN_VERSION}/phpstan.phar /phpstan.phar
 
+RUN curl -sS https://getcomposer.org/installer | php -- --filename=composer && chmod +x composer
+
 ENTRYPOINT ["/usr/bin/php", "/phpstan.phar"]

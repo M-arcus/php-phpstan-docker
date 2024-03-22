@@ -5,6 +5,8 @@ contents:
     - https://packages.wolfi.dev/os
   packages:
     - wolfi-base
+    - curl
+    - zip
     - php-8.2
     - php-8.2-ctype
     - php-8.2-curl
