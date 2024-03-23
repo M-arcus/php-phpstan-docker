@@ -10,8 +10,10 @@ LABEL org.opencontainers.image.authors="M-arcus" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.title="PHPStan"
 
-ADD https://github.com/phpstan/phpstan/releases/download/${PHP_PHPSTAN_VERSION}/phpstan.phar /phpstan.phar
+RUN curl -sS https://getcomposer.org/installer | php -- --filename=composer.php && \
+    chmod +x composer.php && \
+    echo "{}"  > composer.json && php composer.php config -n allow-plugins.phpstan/extension-installer true && \
+    php composer.php req -n -o phpstan/extension-installer phpstan/phpstan:${PHP_PHPSTAN_VERSION} phpstan/phpstan-phpunit phpstan/phpstan-symfony symplify/phpstan-rules:^11 && \
+    rm -f composer.php composer.json composer.lock
 
-RUN curl -sS https://getcomposer.org/installer | php -- --filename=composer && chmod +x composer
-
-ENTRYPOINT ["/usr/bin/php", "/phpstan.phar"]
+ENTRYPOINT ["/usr/bin/php", "/vendor/bin/phpstan"]
