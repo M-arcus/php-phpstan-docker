@@ -1,4 +1,4 @@
-FROM ghcr.io/m-arcus/php-phpstan:base
+FROM chainguard/php:latest
 
 ARG PHP_PHPSTAN_VERSION=1.10.63
 
@@ -10,12 +10,8 @@ LABEL org.opencontainers.image.authors="M-arcus" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.title="PHPStan"
 
-COPY composer.json composer.lock ./
+COPY composer.bash composer.json composer.lock ./
 
-RUN curl -sS https://getcomposer.org/installer | php -- --filename=composer.php && \
-    chmod +x composer.php && \
-    php composer.php req -n -o phpstan/phpstan:${PHP_PHPSTAN_VERSION} && \
-    chmod -Rf +rwx /vendor/ && \
-    rm -f composer.php composer.json composer.lock
+RUN ./composer.bash
 
 ENTRYPOINT ["/usr/bin/php", "/vendor/bin/phpstan"]
